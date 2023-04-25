@@ -65,6 +65,11 @@ pub enum PlacedTile {
 /// A result type alias for tile placement
 pub type TilePlacementResult = Result<PlacedTile, TilePlacementError>;
 
+// Ripped straight out of bevy_ecs_tilemap code
+pub trait MapId: Clone + Copy + PartialEq + Eq + Hash + Into<u16> {}
+
+impl MapId for u16 {}
+
 /// A helper system param used to place tiles
 ///
 /// All methods automatically account for the tile's [`TileType`] and respects Auto Tiles,
