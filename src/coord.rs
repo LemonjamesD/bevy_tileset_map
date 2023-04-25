@@ -1,5 +1,5 @@
 use bevy::math::{IVec2, UVec2};
-use bevy_ecs_tilemap::TilePos;
+use bevy_ecs_tilemap::tiles::TilePos;
 use bevy_tileset::tileset::coords::TileCoords;
 
 /// The coordinates of a tile, including the `map_id` and `layer_id`
