@@ -98,7 +98,7 @@ pub struct TilePlacer<'w, 's> {
 	/// Query used to get info about a tile
 	#[cfg(not(feature = "auto-tile"))]
 	#[allow(dead_code)]
-	query: Query<'w, 's, (&'static Tile, Option<&'static GPUAnimated>)>,
+	query: Query<'w, 's, (&'static Tile, Option<&'static AnimatedTile>)>,
 	/// Query used to get info about a tile
 	#[cfg(feature = "auto-tile")]
 	#[allow(dead_code)]
@@ -107,7 +107,7 @@ pub struct TilePlacer<'w, 's> {
 		's,
 		(
 			&'static Tile,
-			Option<&'static GPUAnimated>,
+			Option<&'static AnimatedTile>,
 			Option<&'static bevy_tileset::auto::AutoTileId>,
 		),
 	>,
@@ -399,11 +399,11 @@ impl<'w, 's> TilePlacer<'w, 's> {
 				let entity = layer_builder
 					.get_tile_entity(&mut self.commands, pos)
 					.map_err(|err| TilePlacementError::MapError(err))?;
-				self.commands.entity(entity).insert(GPUAnimated::new(
-					start as u32,
-					end as u32,
-					speed,
-				));
+				self.commands.entity(entity).insert(				AnimatedTile {
+							start: start as u32,
+							end: end as u32,
+							speed
+						});
 				entity
 			},
 		};
@@ -449,7 +449,7 @@ impl<'w, 's> TilePlacer<'w, 's> {
 						texture_index: index as u16,
 						..Default::default()
 					})
-					.remove::<GPUAnimated>();
+					.remove::<AnimatedTile>();
 			},
 			TileIndex::Animated(start, end, speed) => {
 				self.commands
@@ -458,7 +458,13 @@ impl<'w, 's> TilePlacer<'w, 's> {
 						texture_index: start as u16,
 						..Default::default()
 					})
-					.insert(GPUAnimated::new(start as u32, end as u32, speed));
+					.insert(
+						AnimatedTile {
+							start: start as u32,
+							end: end as u32,
+							speed
+						}
+					);
 			},
 		}
 
@@ -517,14 +523,19 @@ impl<'w, 's> TilePlacer<'w, 's> {
 		match tile_index {
 			TileIndex::Standard(..) => {
 				// Remove any `GPUAnimated` component
-				self.commands.entity(entity).remove::<GPUAnimated>().id()
+				self.commands.entity(entity).remove::<AnimatedTile>().id()
 			},
 			TileIndex::Animated(start, end, speed) => {
 				// Add the `GPUAnimated` component
 				self.commands
-					.entity(entity)
-					.insert(GPUAnimated::new(start as u32, end as u32, speed))
-					.id()
+					.spawn(
+						entity,
+						AnimatedTile {
+							start: start as u32,
+							end: end as u32,
+							speed
+						}
+				)
 			},
 		};
 
